@@ -9,55 +9,56 @@ class UsersController < ApplicationController
   def show
     @user = User.find(params[:id])
     if @user != nil
-      render jason: @user, status: :ok
+      render json: @user, status: :ok
     else
-      message = {'error' => 'Usuario no encontrado'}.to_json
-      render json: message, status: :not_found
+      render json: {error: "Usuario no encontrado"}, status: 404
     end
   end
 
   def destroy
+    @user = User.find(params[:id])
     if @user != nil
       @user.destroy
-      head :no_content
     else
-      message = {'error' => 'Usuario no encontrado'}.to_json
-      render json: message, status: :not_found
+      render json: {error: "Usuario no encontrado"}, status: 404
     end
   end
 
   def update
-    if @user != nil
-      if @user.update(user_params)
-        render jason: @user, status: :ok
+    @user = User.find(params[:id])
+
+    #if user_params[:id].present?
+    #  render json: {error: "id no es modificable"}, status: 400
+    #else
+      if @user != nil
+        if @user.update(user_params)
+          render json: @user, status: :ok
+        else
+          render json: @user.errors, status: :unprocessable_entity
+        end
       else
-        render json: @user.errors, status: :unprocessable_entity
+        render json: {error: "Usuario no encontrado"}, status: 404
       end
-    else
-      message = {'error' => 'Usuario no encontrado'}.to_json
-      render json: message, status: :not_found
-    end
+    #end
   end
 
   def create
     @user = User.new(user_params)
 
     if params[:id].present?
-      message = {'error' => 'No se puede crear usuario con id'}.to_json
-      render json: message, status: :bad_request
+      render json: {error: "No se puede crear usuario con id"}, status: :bad_request
     else
 
       if @user.save
         render json: @user, status: :created
       else
-        message = {'error' => 'La creación ha fallado'}.to_json
-        render json: message, status: :bad_request
+        render json: {error: "La creación ha fallado"}, status: :bad_request
       end
     end
   end
 
   def user_params
-    params.require(:user).permit(:usuario, :nombre, :apellido, :twitter)
+    params.permit(:user, :usuario, :nombre, :apellido, :twitter)
   end
 
 end
