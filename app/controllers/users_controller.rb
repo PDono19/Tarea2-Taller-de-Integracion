@@ -7,39 +7,40 @@ class UsersController < ApplicationController
   end
 
   def show
-    @user = User.find(params[:id])
-    if @user != nil
-      render json: @user, status: :ok
+    if User.exists?(params[:id])
+      render json: User.find(params[:id]), status: :ok
     else
-      render json: {error: "Usuario no encontrado"}, status: 404
+      message = {'error' => 'Usuario no encontrado'}.to_json
+      render json: message, status: :not_found
     end
   end
 
   def destroy
-    @user = User.find(params[:id])
-    if @user != nil
-      @user.destroy
+    if User.exists?(params[:id])
+      User.find(params[:id]).destroy
     else
-      render json: {error: "Usuario no encontrado"}, status: 404
+      message = {'error' => 'Usuario no encontrado'}.to_json
+      render json: message, status: :not_found
     end
   end
 
   def update
-    @user = User.find(params[:id])
-
-    #if user_params[:id].present?
-    #  render json: {error: "id no es modificable"}, status: 400
-    #else
-      if @user != nil
+    if user_params[:id].present?
+      message = {'error' => 'id no es modificable'}.to_json
+      render json: message, status: :bad_request
+    else
+      if User.exists?(params[:id])
+        @user = User.find(params[:id])
         if @user.update(user_params)
           render json: @user, status: :ok
         else
           render json: @user.errors, status: :unprocessable_entity
         end
       else
-        render json: {error: "Usuario no encontrado"}, status: 404
+        message = {'error' => 'Usuario no encontrado'}.to_json
+        render json: message, status: :not_found
       end
-    #end
+    end
   end
 
   def create
